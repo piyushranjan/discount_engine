@@ -10,6 +10,7 @@ class Cart
   end
 
   def add_item(product, quantity)
+    validate_item(product)
     if item = self.items.find{|i| i.product == product}
       item.quantity+= quantity
     else
@@ -66,4 +67,12 @@ class Cart
       "#{item.product.code}\t#{item.product.name}\t\t#{item.product.value}\t#{item.quantity}\t#{item.product.value * item.quantity}"
     }
   end
+
+  private
+  def validate_item(product)
+    unless store.products.include?(product)
+      raise 'we do not sell this product'
+    end
+  end
+
 end

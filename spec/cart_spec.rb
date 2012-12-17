@@ -158,4 +158,15 @@ describe Cart do
 
     cart.to_s.include?(store.products.first.code)
   end
+
+  it "should be able to add a product not available in store" do
+    store = cart.store
+    product = Product.new("G01", "Test product", 100, store.product_types.first)
+    expect {cart.add_item(product, 100)}.to raise_error
+
+    store.add_product(product)
+    expect {cart.add_item(product, 100)}.to_not raise_error
+
+  end
+
 end
