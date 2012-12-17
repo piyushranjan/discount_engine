@@ -56,6 +56,24 @@ describe Store do
     @store = store
   end
 
+  it "should be able to add/remove products" do
+    pcount = store.products.length
+    product = Product.new("T01", "Test", 1, store.product_types.first)
+    store.add_product(product).should be_true
+    store.products.length.should eq(pcount+1)
+    store.remove_product(product).should be_true
+    store.products.length.should eq(pcount)
+  end
+
+  it "should be able to add/remove product types" do
+    pcount = store.product_types.length
+    product_type = ProductType.new("T01")
+    store.add_product_type(product_type).should be_true
+    store.product_types.length.should eq(pcount+1)
+    store.remove_product_type(product_type).should be_true
+    store.product_types.length.should eq(pcount)
+  end
+
   it "should apply $5 bill discount correctly" do
     user = User.new("Normal guy")
 

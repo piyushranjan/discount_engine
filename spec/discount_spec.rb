@@ -72,4 +72,88 @@ describe Discount, "#add_item" do
     c.and_or = :or
     discount.evaluate(@cart).should be_true
   end
+
+  it "should be able to handle two condition sets" do
+    c1 = ConditionSet.new
+    c1.add_condition(Condition.new(Proc.new{|cart| cart.items_count}, :equal, @cart.items_count))
+    discount.add_condition_set(c1)
+    discount.evaluate(@cart).should be_true
+
+    c2 = ConditionSet.new
+    c2.add_condition(Condition.new(Proc.new{|cart| cart.user.user_type}, :equal, :normal))
+    discount.add_condition_set(c2)
+    discount.evaluate(@cart).should be_true
+
+    c2.add_condition(Condition.new(Proc.new{|cart| cart.user.user_type}, :equal, :employee))
+    discount.evaluate(@cart).should be_false
+
+    discount.and_or = :or
+    discount.evaluate(@cart).should be_true
+
+  end
+
+  context "simple conditions" do
+    it "should evaluate equal to predicate" do
+      c = ConditionSet.new
+      c.add_condition(Condition.new("a", :equal, "b"))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_false
+
+      c.add_condition(Condition.new("b", :equal, "b"))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_false
+      c.and_or = :or
+      discount.evaluate(@cart).should be_true
+    end
+
+    it "should evaluate less than predicate" do
+      c = ConditionSet.new
+      c.add_condition(Condition.new(1, :less_than, 2))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_true
+    end
+
+    it "should evaluate less than equal to predicate" do
+      c = ConditionSet.new
+      c.add_condition(Condition.new(2, :less_than_equal, 2))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_true
+
+      c.add_condition(Condition.new(4, :less_than_equal, 3))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_false
+    end
+
+    it "should evaluate greater than equal to predicate" do
+      c = ConditionSet.new
+      c.add_condition(Condition.new(2, :greater_than_equal, 2))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_true
+
+      c.add_condition(Condition.new(1, :greater_than_equal, 2))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_false
+    end
+
+    it "should evaluate not predicate" do
+      c = ConditionSet.new
+      c.add_condition(Condition.new(2, :not, 3))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_true
+
+      c.add_condition(Condition.new(2, :not, 4))
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_true
+
+      bad_condition = Condition.new(2, :not, 2)
+      c.add_condition(bad_condition)
+      discount.add_condition_set(c)
+      discount.evaluate(@cart).should be_false
+
+      c.delete_condition(bad_condition)
+      discount.evaluate(@cart).should be_true
+    end
+
+  end
+
 end

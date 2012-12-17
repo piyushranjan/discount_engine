@@ -149,4 +149,13 @@ describe Cart do
     store.add_discount(discount2)
     cart.discount_amount.should eq(15)
   end
+
+  it "should be able to print itself" do
+    store = cart.store
+    cart.respond_to?(:to_s).should be_true
+    cart.add_item(store.products.first, 10)
+    cart.items_count.should eq(1)
+
+    cart.to_s.include?(store.products.first.code)
+  end
 end
